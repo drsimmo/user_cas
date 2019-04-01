@@ -162,13 +162,13 @@ class UserService
                 # Test for mapped attribute from settings
                 if (array_key_exists($groupMapping, $casAttributes)) {
 
-                    $casGroups = (array)$casAttributes[$groupMapping];
+                  $casGroups = (array)$casAttributes[$groupMapping];
                 } # Test for standard 'groups' attribute
                 else if (array_key_exists('groups', $casAttributes)) {
 
                     $casGroups = (array)$casAttributes['groups'];
                 }
-
+                $this->checkGroups($casGroups);
                 foreach ($casGroups as $casGroup) {
 
                     if (in_array($casGroup, $cas_access_allow_groups)) {
@@ -376,6 +376,7 @@ class UserService
                 }
             }
         }
+        $this->checkGroups($groups);
 
         foreach ($groups as $group) {
 
@@ -507,5 +508,17 @@ class UserService
     public function getBackend()
     {
         return $this->backend;
+    }
+    protected function checkGroups(&$casGroups)
+    {
+                if (substr($casGroups[0],0,2) == "CN") {
+                  $groups = array();
+                  foreach ($casGroups as $casGroup) {
+                    $pieces = explode(",",$casGroup);
+                    $groups[] = substr($pieces[0],3);
+                  }
+                  file_put_contents('/tmp/debug.log',var_export($groups,TRUE));
+                  $casGroups = $groups;
+                }
     }
 }
